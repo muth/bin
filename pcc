@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# perl syntax check, but -I import the appropriate lib
+# usage: pcc Foo.pm     # checks syntax via perl -c
+# usage: pcc Foo.pm vi  # runs vi Foo.pm; when vi is done, if file has been modified run perl -c on it.
+
+if [ -z "$1" ]; then
+    echo "usage: $0 some.pm[:line.*]"
+    exit 1
+fi
+
+file=`echo $1 | sed 's/:.*$//'`
+#echo "file       is ($file)";
+
+if [ -d "$file" ]; then
+    echo "Error: arg is a directory: $file"
+    exit 1;
+fi
+
+BASE=/home/mnieweglowski/opensrs
+BASE_CONTROL_PANEL=/home/mnieweglowski/control_panel
+PRICE_BASE=/home/mnieweglowski/pricing_admin
+
+if [ "xv" = "x$2"  -o "xvi" = "x$2" -o "xvim" = "x$2" ]; then
+
+    line=`echo $1 | sed 's/^[^:]*:\([0-9]*\):*.*$/\1/'`
+    #echo "line       is ($line)";
+    if [ -z "$line" -o "$file" = "$line" ]; then
+	line=0
+    fi
+    shift
+    md5_before=`md5sum $file`
+    $@ $file +"$line"
+    md5_after=`md5sum $file`
+    if [ "x$md5_before" = "x$md5_after" ]; then
+	echo "Skipping pcc since md5_sum hasn't changed ($md5_after)"
+	exit 1;
+    fi
+fi
+
+if echo "$file" | grep -qE '^(.*/)?client/'; then
+    echo "perl -I${BASE}/client/lib -I${BASE}/lib -c $file"
+    perl -I${BASE}/client/lib -I${BASE}/lib -c $file
+elif echo "$file" | grep -qE '^(.*/)?ControlPanel/'; then
+    echo "perl -I${BASE_CONTROL_PANEL}/lib -c $file"
+    perl -I${BASE_CONTROL_PANEL}/lib -c $file
+elif [ "$file" = "search.pl" ]; then
+    echo "perl -I${PRICE_BASE}/lib -c $file"
+    perl -I${PRICE_BASE}/lib -c $file
+else
+    echo "perl -I${BASE}/lib -c $file"
+    perl -I${BASE}/lib -c $file
+fi

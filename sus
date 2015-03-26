@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# SUS = Sort, uniq, sort
+
+sort | uniq -c | sort -nr

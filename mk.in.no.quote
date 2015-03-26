@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+# Input:  a bunch of numbers one per line
+# Output: A SQL "IN" statement with each input line seperated by commas
+
+my @all= <>;
+chomp @all;
+my @in;
+my $MAX_IN_SIZE = 200; 
+
+
+sub complex {
+    my $str;
+    while ( (scalar @in ) > 20 ) {
+	$str .= ",\n" if ( defined $str );
+	my @bit = splice(@in,0,20);
+	$str .= join ( ', ', @bit );
+    }
+    if ( scalar @in ) {
+	$str .= ",\n" if ( defined $str );
+	$str .= join ( ', ', @in );
+    }
+    print $str;
+}
+
+
+sub simple {
+    print join(",\n", map {$_} @in);
+}
+
+sub mkin {
+    print "in(  ";
+#   simple();
+    complex();
+    print ")\n";
+}
+
+sub main {
+    while ( (scalar @all ) > $MAX_IN_SIZE ) {
+	@in = splice(@all,0,$MAX_IN_SIZE);
+	mkin();
+    }
+    if ( scalar @all ) {
+	@in = @all;
+	mkin();
+    }
+}
+
+
+main();

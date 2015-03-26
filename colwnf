@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# grab the last column where input is a space delimited set of columns
+
+if [ 'x$1' = 'x' ]; then
+    awk '{print $NF}'    | sed 's/^"|"$//g';
+else 
+    awk '{print $NF}' $@ | sed 's/^"|"$//g';
+fi
+

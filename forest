@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# cleans up display on some boxes which have very noisy cmdlines
+
+ps -Af --forest | sed \
+    's/-cp [^ ]* *//g;
+    s/-classpath [^ ]* *//g;
+    s/-D[^ ]* *//g;
+    s/source \/etc\/event\.functions.*exec *//g;
+    s/source \/osrs.*exec *//g;
+    s/ if.* fi *//g'

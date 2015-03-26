@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# grab column $1 where input is a csv delimited by ,
+
+COL=$1
+shift;
+
+if [ 'x$1' = 'x' ]; then
+    awk -F , '{print $'$COL'}'    | sed 's/"//g';
+else 
+    awk -F , '{print $'$COL'}' $@ | sed 's/"//g';
+fi
+

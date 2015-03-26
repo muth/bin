@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# git diff > td
+# vi td # look it over, when I'm happy with it then "%!gitd" resulting in just the filenames
+# git commit `<td`
+# git push
+
+if [ 'x$1' = 'x' ]; then
+    awk '/^diff --git a\//{print substr($3,3)}'
+else 
+    awk '/^diff --git a\//{print substr($3,3)}' $@
+fi

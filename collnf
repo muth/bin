@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# grab the last column where input is a csv delimited by ,
+
+if [ 'x$1' = 'x' ]; then
+    awk -F , '{print $NF}'    | sed 's/"//g';
+else 
+    awk -F , '{print $NF}' $@ | sed 's/"//g';
+fi
+

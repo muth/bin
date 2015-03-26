@@ -1,0 +1,19 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $vi = ( -e '/usr/bin/vim' ) ? '/usr/bin/vim' : '/usr/bin/vi';
+my $host = $ENV{HOSTNAME} || $ENV{HOST} || `hostname`;
+
+if ( $host =~ /(masterlog|trust-core|log-1.qas|pgw0..osrs.prod|osrs-maint|pricing|trust-log01)/ || $ENV{USER} eq 'root' ) { 
+    # These hosts have a "vi" which does not support all my macros so use a simple vimrc file
+    exec($vi, '-u', '/home/mnieweglowski/.vimrc.simple', @ARGV);
+} else {
+    if ( $ENV{USER} ne 'mnieweglowski' ) { 
+	# It it isn't me, then call my vimrc
+        exec($vi, '-u', '/home/mnieweglowski/.vimrc', @ARGV);
+    } else {
+	# let vi do it's thing
+        exec($vi, @ARGV);
+    }
+}

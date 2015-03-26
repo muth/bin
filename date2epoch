@@ -1,0 +1,36 @@
+#!/usr/bin/perl -w
+
+# Adhoc script to convert some date to local.
+
+use strict;
+BEGIN {
+    $ENV{TZ} = 'EDT';
+}
+
+use Date::Calc qw(:all);
+use DateTime;
+
+# These are all GMT times.
+my @dates = (
+'2015-01-22 23:59:59'
+);
+
+
+for my $date (@dates) {
+   $date =~ s/\.\d+$//;
+
+    if ( $date !~ /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/ ) {
+	die "Expected YYYY-MM-DD HH24:MI:SS got $date";
+    }
+    my $dt = DateTime->new(
+	year => $1,
+	month => $2,
+	day => $3,
+	hour => $4,
+	minute => $5,
+	second => $6,
+	time_zone => 'UTC',
+    );
+
+    print "time (",$dt->epoch,")\n";
+}

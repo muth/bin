@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# vi the file then "chmod 755" the file.
+
+if [ -n "$1" ]; then
+    vi.wrapper "$1"
+    if [ -r "$1" -a ! -x "$1" ]; then
+	chmod 755 "$1"
+    fi
+fi

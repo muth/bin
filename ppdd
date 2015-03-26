@@ -1,0 +1,91 @@
+#!/usr/bin/perl -w
+
+# Pretty Print Data Dumper
+
+# Input: file with $VAR1 = ...;
+# Output: same as input but prettier (safely).
+
+# This code assumes that you're using the default $Data::Dumper::Terse = 0
+# if you set Terse to true, then you do not get the prefix $VAR1 =, or the suffix ;
+# and this script will not beautify its input.
+
+use strict;
+use Data::Dumper; $Data::Dumper::Sortkeys = 1; $Data::Dumper::Indent = 1;
+use Safe;
+my $SAFE = new Safe;
+$SAFE->permit(qw()); # permit nothing.
+
+sub pretty_print_potential_hash_str {
+    my $hash_as_str = shift;
+
+    # It is common for there to be stuff after Dumper's semicolon e.g. the code
+    # print "x is [" . Dumper($x) . "]\n";
+    # would output
+    # x is [$VAR1 = {...};]
+    # and the terminal ] causes eval() to fail.
+    # so check for a semicolon
+
+    return undef if $hash_as_str !~ /;/;
+
+
+    my $tail = '';
+    while ( $hash_as_str =~ s/(;([^;])*)$// ) {
+	$tail .= $1;
+	# eval() is dangerous e.g. $VAR1 = `rm -rf /`  will ruin your day
+	# my $test = eval( $hash_as_str );
+	my $test = $SAFE->reval( $hash_as_str );
+	if ( ! $@ ) {
+	    $tail =~ s/^;//; # Dumper will insert a semicolon
+
+	    my $pp = Dumper($test);
+	    $pp =~ s/\n$//;
+
+	    return $pp . $tail;
+	}
+    }
+    return undef;
+}
+
+
+sub main {
+    while(<>) {
+	if ( not /\$VAR1 = / ) {
+	    print;
+	    next;
+	}
+	chomp;
+
+	# split on '$VAR1 = ' because we can expect more than one on a line.
+
+	my ($prefix, @data) = split(/\$VAR1 = /, $_);
+	if ( not @data ) {
+	    print $_, "\n";
+	    next;
+	}
+
+	my $output = $prefix;
+	my $hash_as_str = '';
+	while( @data ) {
+	    
+	    # Append to $hash_as_str for initial case and for parse failures.
+	    # e.g. embeded dumped strings.
+	    # log line $VAR1 = { foo => '$VAR1 = {baz => \'bip\'};' }; more log data
+
+	    $hash_as_str .= '$VAR1 = ' if $hash_as_str;
+	    $hash_as_str .= shift @data;
+
+	    my $pp = pretty_print_potential_hash_str( $hash_as_str );
+	    if ( defined $pp ) {
+		$output .= $pp;
+		$hash_as_str = '';
+	    }
+	}
+	if ( $hash_as_str ) {
+	    $output .= '$VAR1 = ';
+	    $output .= $hash_as_str;
+	}
+	print $output, "\n";
+    }
+}
+
+main();

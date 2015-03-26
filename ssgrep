@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# usage: ssgrep -i -E '(foo|bar)'  somedir  grep.results.1
+# runs: grep -i -E '(foo|bar)'  somedir  > grep.results.1; vi ~/grep.results.1
+# but adds a few args to grep to exclude binary files and some large ignorable dirs.
+
+# Get last arg
+FILE="${!#}"
+if echo "$FILE" | grep -qE '^[/~]'; then
+    :
+    # nothing $FILE is fine as is
+else
+    FILE=~/"$FILE"
+fi
+
+grep -rn --binary-files=without-match --exclude-dir=docs --exclude-dir=oracle --exclude-dir=tests --exclude-dir=tests.old --exclude-dir=CVS --exclude-dir=.git --exclude-dir=blocked-names --exclude-dir=vendor "${@:1:$(($#-1))}" > $FILE
+
+
+vi $FILE

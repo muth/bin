@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+
+# Pretty Print JSON
+# Input: some json
+# Output: same but with whitespace / indents.
+
+use strict;
+use Data::Dumper; $Data::Dumper::Sortkeys = 1; $Data::Dumper::Indent = 1; $Data::Dumper::Quotekeys = 0;
+
+use JSON;
+
+while(<>) {
+    eval {
+	if ( /^(.*JSON: )(.*)$/ ) {
+	    my ($prefix, $json_str) = ($1,$2);
+	    my $out = decode_json $json_str;
+	    print $prefix . " " . Dumper($out) . "\n";
+	} else {
+	    my $out = decode_json $_;
+	    print Dumper($out) . "\n";
+	}
+    };
+    if ( $@ ) {
+	print;
+    }
+}
+

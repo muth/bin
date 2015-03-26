@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# grab column $1 where input is a space delimited set of columns
+
+COL=$1
+shift;
+
+if [ 'x$1' = 'x' ]; then
+    awk '{print $'$COL'}'    | sed 's/^"|"$//g';
+else 
+    awk '{print $'$COL'}' $@ | sed 's/^"|"$//g';
+fi
+
